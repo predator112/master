@@ -479,6 +479,9 @@ struct fg_dev {
 	int			last_msoc;
 	int			last_recharge_volt_mv;
 	int			delta_temp_irq_count;
+	int			esr_timer_charging_default[NUM_ESR_TIMERS];
+	int                     battery_full_design;
+	enum slope_limit_status	slope_limit_sts;
 	enum esr_filter_status	esr_flt_sts;
 	bool			profile_available;
 	enum prof_load_status	profile_load_status;
@@ -597,20 +600,12 @@ extern int fg_debugfs_create(struct fg_dev *fg);
 extern void fill_string(char *str, size_t str_len, u8 *buf, int buf_len);
 extern void dump_sram(struct fg_dev *fg, u8 *buf, int addr, int len);
 extern s64 fg_float_decode(u16 val);
-extern bool usb_psy_initialized(struct fg_dev *fg);
-extern bool dc_psy_initialized(struct fg_dev *fg);
-extern bool batt_psy_initialized(struct fg_dev *fg);
-extern bool pc_port_psy_initialized(struct fg_dev *fg);
-extern void fg_notify_charger(struct fg_dev *fg);
-extern bool is_input_present(struct fg_dev *fg);
-extern bool is_qnovo_en(struct fg_dev *fg);
-extern bool is_parallel_charger_available(struct fg_dev *fg);
-extern void fg_circ_buf_add(struct fg_circ_buf *buf, int val);
-extern void fg_circ_buf_clr(struct fg_circ_buf *buf);
-extern int fg_circ_buf_avg(struct fg_circ_buf *buf, int *avg);
-extern int fg_circ_buf_median(struct fg_circ_buf *buf, int *median);
-extern int fg_lerp(const struct fg_pt *pts, size_t tablesize, s32 input,
-			s32 *output);
-void fg_stay_awake(struct fg_dev *fg, int awake_reason);
-void fg_relax(struct fg_dev *fg, int awake_reason);
+extern bool is_input_present(struct fg_chip *chip);
+extern bool is_qnovo_en(struct fg_chip *chip);
+extern void fg_circ_buf_add(struct fg_circ_buf *, int);
+extern void fg_circ_buf_clr(struct fg_circ_buf *);
+extern int fg_circ_buf_avg(struct fg_circ_buf *, int *);
+extern int fg_circ_buf_median(struct fg_circ_buf *, int *);
+extern int fg_lerp(const struct fg_pt *, size_t, s32, s32 *);
+extern int fg_dma_mem_req(struct fg_chip *, bool);
 #endif

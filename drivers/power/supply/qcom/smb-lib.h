@@ -73,6 +73,9 @@ enum print_reason {
 #define MOISTURE_VOTER			"MOISTURE_VOTER"
 #define FG_ESR_VOTER			"FG_ESR_VOTER"
 
+#define THERMAL_CONFIG_FB 1
+#define XIAOMI_CHARGER_RUNIN
+
 #define VCONN_MAX_ATTEMPTS	3
 #define OTG_MAX_ATTEMPTS	3
 #define BOOST_BACK_STORM_COUNT	3
@@ -267,6 +270,7 @@ struct smb_charger {
 	struct power_supply		*usb_main_psy;
 	struct power_supply		*usb_port_psy;
 	enum power_supply_type		real_charger_type;
+	struct power_supply             *pl_psy;
 
 	/* notifiers */
 	struct notifier_block	nb;
@@ -328,6 +332,9 @@ struct smb_charger {
 	int			fake_capacity;
 	int			fake_batt_status;
 	bool			step_chg_enabled;
+#ifdef XIAOMI_CHARGER_RUNIN
+	int			charging_enabled;
+#endif
 	bool			sw_jeita_enabled;
 	bool			is_hdc;
 	bool			chg_done;
@@ -352,18 +359,22 @@ struct smb_charger {
 	u8			float_cfg;
 	bool			use_extcon;
 	bool			otg_present;
-	bool			disable_stat_sw_override;
+	bool			fcc_stepper_mode;
+#ifdef THERMAL_CONFIG_FB
+	struct notifier_block notifier;
+	struct work_struct fb_notify_work;
+#endif
 
 	/* workaround flag */
 	u32			wa_flags;
 	bool			cc2_detach_wa_active;
 	bool			typec_en_dis_active;
+	bool			float_rerun_apsd;
 	bool			try_sink_active;
 	int			boost_current_ua;
 	int			temp_speed_reading_count;
 	int			qc2_max_pulses;
-	bool			non_compliant_chg_detected;
-	bool			reddragon_ipc_wa;
+    bool		non_compliant_chg_detected;
 
 	/* extcon for VBUS / ID notification to USB for uUSB */
 	struct extcon_dev	*extcon;
@@ -448,6 +459,10 @@ int smblib_get_prop_input_current_limited(struct smb_charger *chg,
 				union power_supply_propval *val);
 int smblib_set_prop_input_suspend(struct smb_charger *chg,
 				const union power_supply_propval *val);
+#ifdef XIAOMI_CHARGER_RUNIN
+int lct_set_prop_input_suspend(struct smb_charger *chg,
+				const union power_supply_propval *val);
+#endif
 int smblib_set_prop_batt_capacity(struct smb_charger *chg,
 				const union power_supply_propval *val);
 int smblib_set_prop_batt_status(struct smb_charger *chg,
@@ -545,6 +560,12 @@ int smblib_set_prop_pr_swap_in_progress(struct smb_charger *chg,
 int smblib_stat_sw_override_cfg(struct smb_charger *chg, bool override);
 void smblib_usb_typec_change(struct smb_charger *chg);
 int smblib_toggle_stat(struct smb_charger *chg, int reset);
+
+int smblib_get_prop_battery_full_design(struct smb_charger *chg,
+				     union power_supply_propval *val);
+
+int smblib_set_prop_rerun_apsd(struct smb_charger *chg,
+				const union power_supply_propval *val);
 
 int smblib_init(struct smb_charger *chg);
 int smblib_deinit(struct smb_charger *chg);

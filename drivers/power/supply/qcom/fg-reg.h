@@ -53,6 +53,12 @@
 #define BATT_SOC_SLEEP_SHUTDOWN_STS(chip)	(chip->batt_soc_base + 0x08)
 #define BATT_SOC_FG_MONOTONIC_SOC(chip)		(chip->batt_soc_base + 0x09)
 #define BATT_SOC_FG_MONOTONIC_SOC_CP(chip)	(chip->batt_soc_base + 0x0A)
+#define BATT_SOC_INT_RT_STS(chip)		(chip->batt_soc_base + 0x10)
+#define BATT_SOC_EN_CTL(chip)			(chip->batt_soc_base + 0x46)
+#define BATT_SOC_RESTART(chip)			(chip->batt_soc_base + 0x48)
+#define BATT_SOC_STS_CLR(chip)			(chip->batt_soc_base + 0x4A)
+#define BATT_SOC_LOW_PWR_CFG(chip)		(chip->batt_soc_base + 0x52)
+#define BATT_SOC_LOW_PWR_STS(chip)		(chip->batt_soc_base + 0x56)
 #define BATT_SOC_RST_CTRL0(chip)		(chip->batt_soc_base + 0xBA)
 
 #define BATT_SOC_INT_RT_STS(chip)		(chip->batt_soc_base + 0x10)
@@ -65,16 +71,69 @@
 #define BATT_SOC_RESTART(chip)			(chip->batt_soc_base + 0x48)
 #define RESTART_GO_BIT				BIT(0)
 
-#define BATT_SOC_STS_CLR(chip)			(chip->batt_soc_base + 0x4A)
-#define BATT_SOC_LOW_PWR_CFG(chip)		(chip->batt_soc_base + 0x52)
-#define BATT_SOC_LOW_PWR_STS(chip)		(chip->batt_soc_base + 0x56)
-/* BATT_SOC_RST_CTRL0 */
-#define BCL_RST_BIT				BIT(2)
-#define MEM_RST_BIT				BIT(1)
-#define ALG_RST_BIT				BIT(0)
+/* BCL_RESET */
+#define BCL_RESET_BIT				BIT(2)
 
 /* FG_BATT_INFO register definitions */
 #define BATT_INFO_BATT_TEMP_STS(chip)		(chip->batt_info_base + 0x06)
+#define BATT_INFO_SYS_BATT(chip)		(chip->batt_info_base + 0x07)
+#define BATT_INFO_FG_STS(chip)			(chip->batt_info_base + 0x09)
+#define BATT_INFO_INT_RT_STS(chip)		(chip->batt_info_base + 0x10)
+#define BATT_INFO_BATT_REM_LATCH(chip)		(chip->batt_info_base + 0x4F)
+#define BATT_INFO_BATT_TEMP_LSB(chip)		(chip->batt_info_base + 0x50)
+#define BATT_INFO_BATT_TEMP_MSB(chip)		(chip->batt_info_base + 0x51)
+#define BATT_INFO_BATT_TEMP_CFG(chip)		(chip->batt_info_base + 0x56)
+#define BATT_INFO_BATT_TMPR_INTR(chip)		(chip->batt_info_base + 0x59)
+#define BATT_INFO_THERM_C1(chip)		(chip->batt_info_base + 0x5C)
+#define BATT_INFO_THERM_C2(chip)		(chip->batt_info_base + 0x5D)
+#define BATT_INFO_THERM_C3(chip)		(chip->batt_info_base + 0x5E)
+#define BATT_INFO_THERM_HALF_RANGE(chip)	(chip->batt_info_base + 0x5F)
+#define BATT_INFO_JEITA_CTLS(chip)		(chip->batt_info_base + 0x61)
+#define BATT_INFO_JEITA_TOO_COLD(chip)		(chip->batt_info_base + 0x62)
+#define BATT_INFO_JEITA_COLD(chip)		(chip->batt_info_base + 0x63)
+#define BATT_INFO_JEITA_HOT(chip)		(chip->batt_info_base + 0x64)
+#define BATT_INFO_JEITA_TOO_HOT(chip)		(chip->batt_info_base + 0x65)
+
+/* only for v1.1 */
+#define BATT_INFO_ESR_CFG(chip)			(chip->batt_info_base + 0x69)
+/* starting from v2.0 */
+#define BATT_INFO_ESR_GENERAL_CFG(chip)		(chip->batt_info_base + 0x68)
+#define BATT_INFO_ESR_PULL_DN_CFG(chip)		(chip->batt_info_base + 0x69)
+#define BATT_INFO_ESR_FAST_CRG_CFG(chip)	(chip->batt_info_base + 0x6A)
+
+#define BATT_INFO_BATT_MISS_CFG(chip)		(chip->batt_info_base + 0x6B)
+#define BATT_INFO_WATCHDOG_COUNT(chip)		(chip->batt_info_base + 0x70)
+#define BATT_INFO_WATCHDOG_CFG(chip)		(chip->batt_info_base + 0x71)
+#define BATT_INFO_IBATT_SENSING_CFG(chip)	(chip->batt_info_base + 0x73)
+#define BATT_INFO_QNOVO_CFG(chip)		(chip->batt_info_base + 0x74)
+#define BATT_INFO_QNOVO_SCALER(chip)		(chip->batt_info_base + 0x75)
+
+/* starting from v2.0 */
+#define BATT_INFO_CRG_SERVICES(chip)		(chip->batt_info_base + 0x90)
+
+/* Following LSB/MSB address are for v2.0 and above; v1.1 have them swapped */
+#define BATT_INFO_VBATT_LSB(chip)		(chip->batt_info_base + 0xA0)
+#define BATT_INFO_VBATT_MSB(chip)		(chip->batt_info_base + 0xA1)
+#define BATT_INFO_IBATT_LSB(chip)		(chip->batt_info_base + 0xA2)
+#define BATT_INFO_IBATT_MSB(chip)		(chip->batt_info_base + 0xA3)
+#define BATT_INFO_ESR_LSB(chip)			(chip->batt_info_base + 0xA4)
+#define BATT_INFO_ESR_MSB(chip)			(chip->batt_info_base + 0xA5)
+#define BATT_INFO_VBATT_LSB_CP(chip)		(chip->batt_info_base + 0xA6)
+#define BATT_INFO_VBATT_MSB_CP(chip)		(chip->batt_info_base + 0xA7)
+#define BATT_INFO_IBATT_LSB_CP(chip)		(chip->batt_info_base + 0xA8)
+#define BATT_INFO_IBATT_MSB_CP(chip)		(chip->batt_info_base + 0xA9)
+#define BATT_INFO_ESR_LSB_CP(chip)		(chip->batt_info_base + 0xAA)
+#define BATT_INFO_ESR_MSB_CP(chip)		(chip->batt_info_base + 0xAB)
+#define BATT_INFO_VADC_LSB(chip)		(chip->batt_info_base + 0xAC)
+#define BATT_INFO_VADC_MSB(chip)		(chip->batt_info_base + 0xAD)
+#define BATT_INFO_IADC_LSB(chip)		(chip->batt_info_base + 0xAE)
+#define BATT_INFO_IADC_MSB(chip)		(chip->batt_info_base + 0xAF)
+#define BATT_INFO_TM_MISC(chip)			(chip->batt_info_base + 0xE5)
+#define BATT_INFO_TM_MISC1(chip)		(chip->batt_info_base + 0xE6)
+#define BATT_INFO_PEEK_MUX1(chip)		(chip->batt_info_base + 0xEB)
+#define BATT_INFO_RDBACK(chip)			(chip->batt_info_base + 0xEF)
+
+/* BATT_INFO_BATT_TEMP_STS */
 #define JEITA_TOO_HOT_STS_BIT			BIT(7)
 #define JEITA_HOT_STS_BIT			BIT(6)
 #define JEITA_COLD_STS_BIT			BIT(5)
@@ -292,19 +351,33 @@
 #define ESR_REQ_CTL_BIT				BIT(1)
 #define ESR_REQ_CTL_EN_BIT			BIT(0)
 
-#define BATT_INFO_PEEK_MUX4(chip)		(chip->batt_info_base + 0xEE)
-#define ALG_ACTIVE_PEEK_CFG			0xAC
-
-#define BATT_INFO_PEEK_RD(chip)			(chip->batt_info_base + 0xEF)
-#define ALG_ACTIVE_BIT				BIT(3)
+/* BATT_INFO_PEEK_MUX1 */
+#define PEEK_MUX1_BIT				BIT(0)
 
 /* FG_MEM_IF register and bit definitions */
 #define MEM_IF_INT_RT_STS(chip)			((chip->mem_if_base) + 0x10)
+#define MEM_IF_MEM_ARB_CFG(chip)		((chip->mem_if_base) + 0x40)
+#define MEM_IF_MEM_INTF_CFG(chip)		((chip->mem_if_base) + 0x50)
+#define MEM_IF_IMA_CTL(chip)			((chip->mem_if_base) + 0x51)
+#define MEM_IF_IMA_CFG(chip)			((chip->mem_if_base) + 0x52)
+#define MEM_IF_IMA_OPR_STS(chip)		((chip->mem_if_base) + 0x54)
+#define MEM_IF_IMA_EXP_STS(chip)		((chip->mem_if_base) + 0x55)
+#define MEM_IF_IMA_HW_STS(chip)			((chip->mem_if_base) + 0x56)
+#define MEM_IF_FG_BEAT_COUNT(chip)		((chip->mem_if_base) + 0x57)
+#define MEM_IF_IMA_ERR_STS(chip)		((chip->mem_if_base) + 0x5F)
+#define MEM_IF_IMA_BYTE_EN(chip)		((chip->mem_if_base) + 0x60)
+#define MEM_IF_ADDR_LSB(chip)			((chip->mem_if_base) + 0x61)
+#define MEM_IF_ADDR_MSB(chip)			((chip->mem_if_base) + 0x62)
+#define MEM_IF_WR_DATA0(chip)			((chip->mem_if_base) + 0x63)
+#define MEM_IF_WR_DATA3(chip)			((chip->mem_if_base) + 0x66)
+#define MEM_IF_RD_DATA0(chip)			((chip->mem_if_base) + 0x67)
+#define MEM_IF_RD_DATA3(chip)			((chip->mem_if_base) + 0x6A)
+#define MEM_IF_DMA_STS(chip)			((chip->mem_if_base) + 0x70)
+#define MEM_IF_DMA_CTL(chip)			((chip->mem_if_base) + 0x71)
+
+/* MEM_IF_INT_RT_STS */
 #define MEM_XCP_BIT				BIT(1)
 #define MEM_GNT_BIT				BIT(2)
-#define GEN4_DMA_XCP_BIT			BIT(2)
-#define GEN4_MEM_GNT_BIT			BIT(3)
-#define GEN4_MEM_ATTN_BIT			BIT(4)
 
 #define MEM_IF_MEM_ARB_CFG(chip)		((chip->mem_if_base) + 0x40)
 #define MEM_CLR_LOG_BIT				BIT(2)
@@ -363,19 +436,6 @@
 #define MEM_IF_DMA_CTL(chip)			((chip->mem_if_base) + 0x71)
 #define ADDR_KIND_BIT				BIT(1)
 #define DMA_CLEAR_LOG_BIT			BIT(0)
-
-/* FG_DMAx */
-#define FG_DMA0_BASE				0x4800
-#define FG_DMA1_BASE				0x4900
-#define FG_DMA2_BASE				0x4A00
-#define FG_DMA3_BASE				0x4B00
-#define SRAM_ADDR_OFFSET			0x20
-
-/* GEN4 FG_DMAx */
-#define GEN4_FG_DMA0_BASE			0x4400
-#define GEN4_FG_DMA1_BASE			0x4500
-#define GEN4_FG_DMA2_BASE			0x4600
-#define GEN4_FG_DMA3_BASE			0x4700
-#define GEN4_FG_DMA4_BASE			0x4800
-#define GEN4_FG_DMA5_BASE			0x4900
+/* MEM_IF_REQ */
+#define MEM_IF_ARB_REQ_BIT			BIT(0)
 #endif
