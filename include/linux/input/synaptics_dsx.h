@@ -3,7 +3,10 @@
  *
  * Copyright (C) 2012-2016 Synaptics Incorporated. All rights reserved.
  *
+<<<<<<< HEAD
  * Copyright (c) 2018 The Linux Foundation. All rights reserved.
+=======
+>>>>>>> 6a2ec3a6100c... drivers: input: touchscreen: Import xiaomi touchscreen driver
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
  *
