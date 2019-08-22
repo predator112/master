@@ -16,6 +16,10 @@
 #include <linux/delay.h>
 #include <linux/mdss_io_util.h>
 
+#ifdef CONFIG_KERNEL_CUSTOM_E7S
+extern bool enable_gesture_mode;
+extern bool synaptics_gesture_func_on;
+#endif
 #define MAX_I2C_CMDS  16
 void dss_reg_w(struct dss_io_data *io, u32 offset, u32 value, u32 debug)
 {
@@ -213,52 +217,7 @@ vreg_get_fail:
 } /* msm_dss_config_vreg */
 EXPORT_SYMBOL(msm_dss_config_vreg);
 
-int msm_dss_config_vreg_opt_mode(struct dss_vreg *in_vreg, int num_vreg,
-				 enum dss_vreg_mode mode)
-{
-	int i = 0, rc = 0;
-
-	if (mode >= DSS_REG_MODE_MAX) {
-		pr_err("%pS->%s: invalid mode %d\n",
-			 __builtin_return_address(0), __func__, mode);
-		rc = -EINVAL;
-		goto error;
-	}
-
-	for (i = 0; i < num_vreg; i++) {
-		rc = PTR_RET(in_vreg[i].vreg);
-		if (rc) {
-			DEV_ERR("%pS->%s: %s regulator error. rc=%d\n",
-				__builtin_return_address(0), __func__,
-				in_vreg[i].vreg_name, rc);
-			goto error;
-		}
-
-		DEV_DBG("%s: Setting optimum mode %d for %s (load=%d)\n",
-			__func__, mode, in_vreg[i].vreg_name,
-			in_vreg[i].load[mode]);
-		rc = regulator_set_load(in_vreg[i].vreg,
-					in_vreg[i].load[mode]);
-		if (rc < 0) {
-			DEV_ERR("%pS->%s: %s set opt mode failed. rc=%d\n",
-				__builtin_return_address(0), __func__,
-				in_vreg[i].vreg_name, rc);
-			goto error;
-		} else {
-			/*
-			 * regulator_set_load can return non-zero
-			 * value for success. However, this API is expected
-			 * to return 0 for success.
-			 */
-			rc = 0;
-		}
-	}
-
-error:
-	return rc;
-}
-EXPORT_SYMBOL(msm_dss_config_vreg_opt_mode);
-
+extern bool ESD_TE_status;
 int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 {
 	int i = 0, rc = 0;
@@ -266,6 +225,17 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 
 	if (enable) {
 		for (i = 0; i < num_vreg; i++) {
+#ifdef CONFIG_KERNEL_CUSTOM_E7S
+			/* vddio lab ibb continus supply */
+			if(enable_gesture_mode || synaptics_gesture_func_on) {
+				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
+						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||
+						(strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {
+					printk(KERN_ERR "[LCD][TP][Gesture][resume] '%s' power continus supply\n",in_vreg[i].vreg_name);
+					continue;
+				}
+			}
+#endif
 			rc = PTR_RET(in_vreg[i].vreg);
 			if (rc) {
 				DEV_ERR("%pS->%s: %s regulator error. rc=%d\n",
@@ -298,6 +268,24 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 		}
 	} else {
 		for (i = num_vreg-1; i >= 0; i--) {
+			if(ESD_TE_status){
+				printk(KERN_ERR "panel esd check recovery \n");
+				if((strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {
+						printk(KERN_ERR "panel '%s' power continus supply\n",in_vreg[i].vreg_name);
+						continue;
+				}
+			}
+#ifdef CONFIG_KERNEL_CUSTOM_E7S
+			/* vddio lab ibb continus supply */
+			if(enable_gesture_mode || synaptics_gesture_func_on) {
+				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
+						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||
+						(strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {
+					printk(KERN_ERR "[LCD][TP][Gesture][suspend] '%s' power continus supply\n",in_vreg[i].vreg_name);
+					continue;
+				}
+			}
+#endif
 			if (in_vreg[i].pre_off_sleep)
 				usleep_range(in_vreg[i].pre_off_sleep * 1000,
 					in_vreg[i].pre_off_sleep * 1000);
