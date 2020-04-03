@@ -18,9 +18,9 @@
 #include "sdm636-mtp.dtsi"
 #include "sdm660-internal-codec.dtsi"
 / {
-	model = "Qualcomm Technologies, Inc. SDM 636 PM660 + PM660L MTP E7T";
+	model = "Qualcomm Technologies, Inc. SDM 636 PM660 + PM660L E7S";
 	compatible = "qcom,sdm636-mtp", "qcom,sdm636", "qcom,mtp";
-	qcom,board-id = <0x40008 0>; 
+	qcom,board-id = <0x30008 0>; 
 	qcom,pmic-id = <0x0001001b 0x0101011a 0x0 0x0>,
 			<0x0001001b 0x0201011a 0x0 0x0>;
 };
@@ -28,8 +28,6 @@
 &tavil_snd {
 	qcom,msm-mbhc-moist-cfg = <0>, <0>, <3>;
 };
-
-//add by hanchangyu for hall at 20181114 start
 &tlmm {
 	hall_int_active:hall_int_active {
 		mux {
@@ -69,4 +67,4 @@
 	};
 };
 
-#include "xiaomi/tulip.dtsi"
+#include "xiaomi/whyred.dtsi"
