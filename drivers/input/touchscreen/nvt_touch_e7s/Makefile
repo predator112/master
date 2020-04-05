@@ -5,3 +5,6 @@
 # Each configuration option enables a list of files.
 
 obj-$(CONFIG_TOUCHSCREEN_NVT_E7S) += nt36xxx.o nt36xxx_fw_update.o nt36xxx_ext_proc.o nt36xxx_mp_ctrlram.o
+
+subdir-ccflags-y += \
+	-Wno-implicit-function-declaration
