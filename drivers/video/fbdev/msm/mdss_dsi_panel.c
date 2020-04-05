@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2019 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,14 +16,11 @@
 #include <linux/of.h>
 #include <linux/of_gpio.h>
 #include <linux/gpio.h>
+#include <linux/qpnp/pin.h>
 #include <linux/delay.h>
 #include <linux/slab.h>
-#ifndef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
 #include <linux/leds.h>
-#else
-#include <linux/backlight.h>
-#endif
-#include <linux/pwm.h>
+#include <linux/qpnp/pwm.h>
 #include <linux/err.h>
 #include <linux/string.h>
 
@@ -31,12 +28,14 @@
 #include "mdss_dba_utils.h"
 #include "mdss_debug.h"
 
+#ifdef CONFIG_POWERSUSPEND
+#include <linux/powersuspend.h>
+#endif
+
 #define DT_CMD_HDR 6
 #define DEFAULT_MDP_TRANSFER_TIME 14000
 
 #define VSYNC_DELAY msecs_to_jiffies(17)
-#ifndef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
-
 bool tianma_jdi_flag=0;
 extern int first_ce_state, first_cabc_state, first_srgb_state, first_gamma_state, first_cabc_movie_state, first_cabc_still_state;
 extern int mdss_first_set_feature(struct mdss_panel_data *pdata, int first_ce_state, int first_cabc_state, int first_srgb_state, int first_gamma_state,
@@ -65,7 +64,6 @@ extern bool synaptics_gesture_func_on;
 
 bool ESD_TE_status = false;
 DEFINE_LED_TRIGGER(bl_led_trigger);
-#endif
 
 void mdss_dsi_panel_pwm_cfg(struct mdss_dsi_ctrl_pdata *ctrl)
 {
@@ -110,10 +108,10 @@ static void mdss_dsi_panel_bklt_pwm(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 
 	if (level == 0) {
 		if (ctrl->pwm_enabled) {
-			ret = pwm_config(ctrl->pwm_bl, 0,
-				ctrl->pwm_period * NSEC_PER_USEC);
+			ret = pwm_config_us(ctrl->pwm_bl, level,
+					ctrl->pwm_period);
 			if (ret)
-				pr_err("%s: pwm_config() failed err=%d.\n",
+				pr_err("%s: pwm_config_us() failed err=%d.\n",
 						__func__, ret);
 			pwm_disable(ctrl->pwm_bl);
 		}
@@ -132,10 +130,9 @@ static void mdss_dsi_panel_bklt_pwm(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 					ctrl->ndx, level, duty);
 
 	if (ctrl->pwm_period >= USEC_PER_SEC) {
-
-		ret = pwm_config(ctrl->pwm_bl, duty, ctrl->pwm_period);
+		ret = pwm_config_us(ctrl->pwm_bl, duty, ctrl->pwm_period);
 		if (ret) {
-			pr_err("%s: pwm_config() failed err=%d.\n",
+			pr_err("%s: pwm_config_us() failed err=%d.\n",
 					__func__, ret);
 			return;
 		}
@@ -704,8 +701,8 @@ static char paset_dual[] = {0x2b, 0x00, 0x00, 0x05, 0x00, 0x03,
 
 /* pack into one frame before sent */
 static struct dsi_cmd_desc set_col_page_addr_cmd[] = {
-	{{DTYPE_DCS_LWRITE, 0, 0, 0, 1, sizeof(caset)}, caset},	/* packed */
-	{{DTYPE_DCS_LWRITE, 1, 0, 0, 1, sizeof(paset)}, paset},
+	{{DTYPE_DCS_LWRITE, 0, 0, 0, 0, sizeof(caset)}, caset},	/* packed */
+	{{DTYPE_DCS_LWRITE, 1, 0, 0, 0, sizeof(paset)}, paset},
 };
 
 /* pack into one frame before sent */
@@ -1018,11 +1015,7 @@ static void mdss_dsi_panel_bl_ctrl(struct mdss_panel_data *pdata,
 
 	switch (ctrl_pdata->bklt_ctrl) {
 	case BL_WLED:
-#ifndef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
 		led_trigger_event(bl_led_trigger, bl_level);
-#else
-		backlight_device_set_brightness(ctrl_pdata->raw_bd, bl_level);
-#endif
         if(bl_level != 0)
 		{
               first_set_bl = true;
@@ -1097,6 +1090,10 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
+
+#ifdef CONFIG_POWERSUSPEND
+	set_power_suspend_state_panel_hook(POWER_SUSPEND_INACTIVE);
+#endif
 
 	pinfo = &pdata->panel_info;
 	ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata,
@@ -1232,6 +1229,10 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 		mdss_dba_utils_video_off(pinfo->dba_data);
 		mdss_dba_utils_hdcp_enable(pinfo->dba_data, false);
 	}
+
+#ifdef CONFIG_POWERSUSPEND
+	set_power_suspend_state_panel_hook(POWER_SUSPEND_ACTIVE);
+#endif
 
 end:
 	pr_err("%s:-\n", __func__);
@@ -2593,22 +2594,6 @@ dynamic_bitclk:
 	return;
 }
 
-#ifdef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
-static int dsi_panel_wled_register(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
-{
-	int rc = 0;
-	struct backlight_device *bd;
-
-	bd = backlight_device_get_by_type(BACKLIGHT_RAW);
-	if (!bd) {
-		pr_err("fail raw backlight register\n");
-		rc = -EINVAL;
-	}
-	ctrl_pdata->raw_bd = bd;
-	return rc;
-}
-#endif
-
 int mdss_panel_parse_bl_settings(struct device_node *np,
 			struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
@@ -2620,14 +2605,8 @@ int mdss_panel_parse_bl_settings(struct device_node *np,
 	data = of_get_property(np, "qcom,mdss-dsi-bl-pmic-control-type", NULL);
 	if (data) {
 		if (!strcmp(data, "bl_ctrl_wled")) {
-#ifndef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
 			led_trigger_register_simple("bkl-trigger",
 				&bl_led_trigger);
-#else
-			rc = dsi_panel_wled_register(ctrl_pdata);
-			if (rc)
-				return rc;
-#endif
 			pr_debug("%s: SUCCESS-> WLED TRIGGER register\n",
 				__func__);
 			ctrl_pdata->bklt_ctrl = BL_WLED;
@@ -2725,13 +2704,12 @@ int mdss_dsi_panel_timing_switch(struct mdss_dsi_ctrl_pdata *ctrl,
 	return 0;
 }
 
-#ifndef CONFIG_BACKLIGHT_QCOM_SPMI_WLED
 void mdss_dsi_unregister_bl_settings(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
 	if (ctrl_pdata->bklt_ctrl == BL_WLED)
 		led_trigger_unregister_simple(bl_led_trigger);
 }
-#endif
+
 static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 		struct dsi_panel_timing *pt,
 		struct mdss_panel_data *panel_data)
