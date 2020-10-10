@@ -49,10 +49,11 @@
 
 		CPU0: cpu@0 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x0>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile0>;
+                        capacity-dmips-mhz = <1024>;
+			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			qcom,ea = <&ea0>;
 			efficiency = <1024>;
@@ -78,10 +79,11 @@
 
 		CPU1: cpu@1 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x1>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile0>;
+                        capacity-dmips-mhz = <1024>;
+			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			qcom,ea = <&ea1>;
 			efficiency = <1024>;
@@ -101,10 +103,11 @@
 
 		CPU2: cpu@2 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x2>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile0>;
+                        capacity-dmips-mhz = <1024>;
+			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			qcom,ea = <&ea2>;
 			efficiency = <1024>;
@@ -124,10 +127,11 @@
 
 		CPU3: cpu@3 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x3>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile0>;
+                        capacity-dmips-mhz = <1024>;
+			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			qcom,ea = <&ea3>;
 			efficiency = <1024>;
@@ -147,10 +151,11 @@
 
 		CPU4: cpu@100 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x100>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile1>;
+                        capacity-dmips-mhz = <1638>;
+			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			qcom,ea = <&ea4>;
 			efficiency = <1638>;
@@ -174,10 +179,11 @@
 
 		CPU5: cpu@101 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x101>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile2>;
+                        capacity-dmips-mhz = <1638>;
+			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			qcom,ea = <&ea5>;
 			efficiency = <1638>;
@@ -197,10 +203,11 @@
 
 		CPU6: cpu@102 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x102>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile3>;
+                        capacity-dmips-mhz = <1638>;
+			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			qcom,ea = <&ea6>;
 			efficiency = <1638>;
@@ -220,10 +227,11 @@
 
 		CPU7: cpu@103 {
 			device_type = "cpu";
-			compatible = "arm,armv8";
+			compatible = "arm,kryo";
 			reg = <0x0 0x103>;
 			enable-method = "psci";
-			qcom,limits-info = <&mitigation_profile4>;
+                        capacity-dmips-mhz = <1638>;
+			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			qcom,ea = <&ea7>;
 			efficiency = <1638>;
@@ -279,6 +287,7 @@
 			};
 		};
 	};
+
         energy_costs: energy-costs {
 		compatible = "sched-energy";
 
