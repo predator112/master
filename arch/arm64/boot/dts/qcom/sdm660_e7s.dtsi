@@ -2788,5 +2788,11 @@
 	status = "ok";
 };
 
+
+&apps_iommu {
+	qcom,no-aarch64;
+};
+
+
 #include "sdm660-mdss.dtsi"
 #include "sdm660-mdss-pll.dtsi"
